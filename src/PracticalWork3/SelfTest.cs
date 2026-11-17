@@ -192,7 +192,63 @@ public static class SelfTest
             return L(a) == "8 1 9 7" && L(b) == "5 3 8 1 9 7" && c.IsEmpty && c.Tail is null && c.Count == 0
                 && Demos.Verify(a).Contains("OK") && Demos.Verify(b).Contains("OK");
         });
-
+        
+        // ---- Часть 4: пункты 9–12 ----
+        Check("Список: Concat (дописать E в конец L)", () =>
+        {
+            var l = ListAlgorithms.ParseList("1 2 3");
+            var e = ListAlgorithms.ParseList("4 5");
+            ListAlgorithms.Concat(l, e);
+            // E после слияния обнуляется
+            var emptyL = new MyLinkedList<int>();
+            var e2 = ListAlgorithms.ParseList("7 8");
+            ListAlgorithms.Concat(emptyL, e2);
+            // самослияние: Concat(L, L) не должно зацикливаться
+            var self = ListAlgorithms.ParseList("1 2");
+            ListAlgorithms.Concat(self, self);
+            return L(l) == "1 2 3 4 5" && l.Count == 5 && e.IsEmpty && e.Count == 0
+                && L(emptyL) == "7 8" && L(self) == "1 2 1 2"
+                && Demos.Verify(l).Contains("OK") && Demos.Verify(emptyL).Contains("OK")
+                && Demos.Verify(self).Contains("OK");
+        });
+        Check("Список: SplitAtFirst (разбиение по первому вхождению)", () =>
+        {
+            // число в середине
+            var (f1, s1) = ListAlgorithms.SplitAtFirst(ListAlgorithms.ParseList("1 2 3 4 5"), 3);
+            // числа нет: first = весь список, second пуст
+            var (f2, s2) = ListAlgorithms.SplitAtFirst(ListAlgorithms.ParseList("1 2 3"), 9);
+            // число — первый элемент: first пуст
+            var (f3, s3) = ListAlgorithms.SplitAtFirst(ListAlgorithms.ParseList("3 4 5"), 3);
+            // число — последний элемент: second пуст
+            var (f4, s4) = ListAlgorithms.SplitAtFirst(ListAlgorithms.ParseList("1 2 3"), 3);
+            return L(f1) == "1 2" && L(s1) == "4 5"
+                && L(f2) == "1 2 3" && s2.IsEmpty
+                && f3.IsEmpty && L(s3) == "4 5"
+                && L(f4) == "1 2" && s4.IsEmpty
+                && Demos.Verify(f1).Contains("OK") && Demos.Verify(s1).Contains("OK")
+                && Demos.Verify(f2).Contains("OK") && Demos.Verify(f3).Contains("OK")
+                && Demos.Verify(f4).Contains("OK");
+        });
+        Check("Список: DoubleSelf (удвоение)", () =>
+        {
+            var a = ListAlgorithms.ParseList("1 2 3"); ListAlgorithms.DoubleSelf(a);
+            var b = ListAlgorithms.ParseList("7"); ListAlgorithms.DoubleSelf(b);
+            var c = new MyLinkedList<int>(); ListAlgorithms.DoubleSelf(c);
+            return L(a) == "1 2 3 1 2 3" && a.Count == 6
+                && L(b) == "7 7" && b.Count == 2
+                && c.IsEmpty && c.Count == 0
+                && Demos.Verify(a).Contains("OK") && Demos.Verify(b).Contains("OK");
+        });
+        Check("Список: SwapElements (обмен по индексам)", () =>
+        {
+            var a = ListAlgorithms.ParseList("1 2 3 4 5"); ListAlgorithms.SwapElements(a, 0, 4);
+            var b = ListAlgorithms.ParseList("1 2 3 4 5"); ListAlgorithms.SwapElements(b, 1, 3);
+            var c = ListAlgorithms.ParseList("1 2 3"); ListAlgorithms.SwapElements(c, 1, 1); // тот же индекс — без изменений
+            return L(a) == "5 2 3 4 1" && L(b) == "1 4 3 2 5" && L(c) == "1 2 3"
+                && Demos.Verify(a).Contains("OK") && Demos.Verify(b).Contains("OK")
+                && Throws<ArgumentOutOfRangeException>(() => ListAlgorithms.SwapElements(ListAlgorithms.ParseList("1 2"), 0, 2))
+                && Throws<ArgumentOutOfRangeException>(() => ListAlgorithms.SwapElements(ListAlgorithms.ParseList("1 2"), -1, 0));
+        });
         // ---- Часть 4: дерево ----
         Check("Дерево с рисунка: обходы, характеристики, сериализация", () =>
         {

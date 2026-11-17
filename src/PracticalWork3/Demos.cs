@@ -244,6 +244,38 @@ public static class Demos
         Console.WriteLine($"{"3. CountDistinct (различных элементов)",-44} {ListAlgorithms.CountDistinct(original)}");
         Show("4. RemoveNonUnique (убрать все повторяющиеся)", ListAlgorithms.RemoveNonUnique);
         Show("4*. RemoveDuplicatesKeepFirst (вариант)", ListAlgorithms.RemoveDuplicatesKeepFirst);
+
+        // пп. 9–12
+        Console.WriteLine("\n── Пункты 9–12 ──");
+
+        // 9. Concat: L + E (E задаётся в коде)
+        var e = ListAlgorithms.ParseList("10 20 30");
+        Console.WriteLine("Список E (задан в коде): " + e);
+        var l9 = original.Clone();
+        var e9 = e.Clone();
+        ListAlgorithms.Concat(l9, e9);
+        Console.WriteLine($"{"9. Concat (L + E)",-44} {l9}   {Verify(l9)}");
+        Console.WriteLine($"   E после Concat (должен быть пуст): {e9}");
+
+        // 10. SplitAtFirst по числу 3
+        int pivot = 3;
+        var l10 = original.Clone();
+        var (first, second) = ListAlgorithms.SplitAtFirst(l10, pivot);
+        Console.WriteLine($"10. SplitAtFirst по числу {pivot}:");
+        Console.WriteLine($"    first  = {first}   {Verify(first)}");
+        Console.WriteLine($"    second = {second}   {Verify(second)}");
+        Console.WriteLine($"    L после разбиения (должен быть пуст): {l10}");
+
+        // 11. DoubleSelf
+        var l11 = original.Clone();
+        ListAlgorithms.DoubleSelf(l11);
+        Console.WriteLine($"{"11. DoubleSelf (удвоение)",-44} {l11}   {Verify(l11)}");
+
+        // 12. SwapElements(0, 2)
+        var l12 = original.Clone();
+        ListAlgorithms.SwapElements(l12, 0, 2);
+        Console.WriteLine($"{"12. SwapElements(0, 2)",-44} {l12}   {Verify(l12)}");
+
         Console.WriteLine("\n(в скобках — проверка согласованности Head/Tail/Count после перешивания ссылок)");
     }
 
