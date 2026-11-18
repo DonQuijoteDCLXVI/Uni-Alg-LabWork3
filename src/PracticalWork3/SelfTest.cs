@@ -193,6 +193,105 @@ public static class SelfTest
                 && Demos.Verify(a).Contains("OK") && Demos.Verify(b).Contains("OK");
         });
         
+        // ---- Часть 4: пункты 5–8 ----
+        Check("Список п.5: вставка списка в себя после первого x", () =>
+        {
+            var a = ListAlgorithms.ParseList("1 2 3 4"); bool fa = ListAlgorithms.InsertSelfAfterFirst(a, 2);
+            var b = ListAlgorithms.ParseList("1 2 3 4"); bool fb = ListAlgorithms.InsertSelfAfterFirst(b, 4);   // x — хвост
+            var c = ListAlgorithms.ParseList("1 2 3 4"); bool fc = ListAlgorithms.InsertSelfAfterFirst(c, 1);   // x — голова
+            var d = ListAlgorithms.ParseList("1 2 3");   bool fd = ListAlgorithms.InsertSelfAfterFirst(d, 9);   // x нет
+            var e = ListAlgorithms.ParseList("7");       bool fe = ListAlgorithms.InsertSelfAfterFirst(e, 7);
+            var f = ListAlgorithms.ParseList("2 5 2");   ListAlgorithms.InsertSelfAfterFirst(f, 2);             // первое вхождение
+            var g = new MyLinkedList<int>();             bool fg = ListAlgorithms.InsertSelfAfterFirst(g, 1);
+            return fa && L(a) == "1 2 1 2 3 4 3 4" && a.Count == 8
+                && fb && L(b) == "1 2 3 4 1 2 3 4" && b.Count == 8
+                && fc && L(c) == "1 1 2 3 4 2 3 4" && c.Count == 8
+                && !fd && L(d) == "1 2 3" && d.Count == 3
+                && fe && L(e) == "7 7" && e.Count == 2
+                && L(f) == "2 2 5 2 5 2" && !fg && g.IsEmpty
+                && new[] { a, b, c, d, e, f, g }.All(x => Demos.Verify(x).Contains("OK"));
+        });
+        Check("Список п.6: вставка в упорядоченный список", () =>
+        {
+            string Ins(string src, int v) { var l = ListAlgorithms.ParseList(src); ListAlgorithms.InsertSorted(l, v);
+                                            return L(l) + (Demos.Verify(l).Contains("OK") ? "" : "!"); }
+            return Ins("1 3 5", 0) == "0 1 3 5"          // в начало
+                && Ins("1 3 5", 9) == "1 3 5 9"          // в конец
+                && Ins("1 3 5", 4) == "1 3 4 5"          // в середину
+                && Ins("1 3 3 5", 3) == "1 3 3 3 5"      // равные значения
+                && Ins("1 3 5", 5) == "1 3 5 5"
+                && Ins("4", 2) == "2 4" && Ins("4", 4) == "4 4" && Ins("4", 8) == "4 8"
+                && Throws<InvalidOperationException>(() => ListAlgorithms.InsertSorted(new MyLinkedList<int>(), 1));
+        });
+        Check("Список п.7: удаление всех элементов E", () =>
+        {
+            var a = ListAlgorithms.ParseList("3 1 3 3 2 3"); int ra = ListAlgorithms.RemoveAll(a, 3);   // голова, середина, хвост
+            var b = ListAlgorithms.ParseList("2 2 2");       int rb = ListAlgorithms.RemoveAll(b, 2);   // всё
+            var c = ListAlgorithms.ParseList("1 2 3");       int rc = ListAlgorithms.RemoveAll(c, 9);   // нет такого
+            var d = new MyLinkedList<int>();                 int rd = ListAlgorithms.RemoveAll(d, 1);
+            return L(a) == "1 2" && ra == 4 && a.Count == 2
+                && b.IsEmpty && rb == 3 && b.Tail is null && b.Count == 0
+                && L(c) == "1 2 3" && rc == 0 && rd == 0
+                && Demos.Verify(a).Contains("OK") && Demos.Verify(b).Contains("OK") && Demos.Verify(c).Contains("OK");
+        });
+        Check("Список п.8: вставка F перед первым вхождением E", () =>
+        {
+            string Ins(string src, int e, int f, out bool ok) { var l = ListAlgorithms.ParseList(src);
+                ok = ListAlgorithms.InsertBeforeFirst(l, e, f);
+                return L(l) + (Demos.Verify(l).Contains("OK") ? "" : "!"); }
+            string r1 = Ins("1 2 3 2", 2, 9, out bool o1);   // середина, первое из двух
+            string r2 = Ins("2 1", 2, 9, out bool o2);       // голова
+            string r3 = Ins("1 2", 2, 9, out bool o3);       // хвост
+            string r4 = Ins("1 2", 5, 9, out bool o4);       // E нет
+            string r5 = Ins("", 5, 9, out bool o5);          // пустой
+            return o1 && r1 == "1 9 2 3 2" && o2 && r2 == "9 2 1" && o3 && r3 == "1 9 2"
+                && !o4 && r4 == "1 2" && !o5 && r5 == "";
+        });
+        Check("Визуализатор: Execute() — подсветка и ошибки", () =>
+        {
+            var r5 = Visual.ListOps.Execute(new Visual.RunRequest(new[] { 1, 2, 3 }, "insertSelf", 2, null, null));
+            var r6 = Visual.ListOps.Execute(new Visual.RunRequest(new[] { 1, 3, 5 }, "insertSorted", null, 4, null));
+            var r7 = Visual.ListOps.Execute(new Visual.RunRequest(new[] { 3, 1, 3 }, "removeAll", null, 3, null));
+            var r8 = Visual.ListOps.Execute(new Visual.RunRequest(new[] { 1, 2 }, "insertBefore", null, 2, 9));
+            return r5.After.SequenceEqual(new[] { 1, 2, 1, 2, 3, 3 }) && r5.AfterHl.SequenceEqual(new[] { 2, 3, 4 }) && r5.BeforeHl.SequenceEqual(new[] { 1 })
+                && r6.After.SequenceEqual(new[] { 1, 3, 4, 5 }) && r6.AfterHl.SequenceEqual(new[] { 2 })
+                && r7.After.SequenceEqual(new[] { 1 }) && r7.BeforeHl.SequenceEqual(new[] { 0, 2 })
+                && r8.After.SequenceEqual(new[] { 1, 9, 2 }) && r8.AfterHl.SequenceEqual(new[] { 1 })
+                && r5.Consistent && r6.Consistent && r7.Consistent && r8.Consistent
+                && Throws<ArgumentException>(() => Visual.ListOps.Execute(new Visual.RunRequest(new[] { 3, 1 }, "insertSorted", null, 2, null)))
+                && Throws<ArgumentException>(() => Visual.ListOps.Execute(new Visual.RunRequest(new[] { 1 }, "insertSelf", null, null, null)));
+        });
+        Check("Визуализатор: все операции пп. 1–12 через Execute()", () =>
+        {
+            Visual.RunResult Run(string op, string list, int? x = null, int? e = null, int? f = null, string? other = null, int? i = null, int? j = null)
+            {
+                int[] P(string t) => t.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+                return Visual.ListOps.Execute(new Visual.RunRequest(P(list), op, x, e, f, other is null ? null : P(other), i, j));
+            }
+            string J(int[]? a) => a is null ? "null" : string.Join(" ", a);
+            var rev = Run("reverse", "1 2 3");
+            var ml = Run("moveLast", "1 2 3");
+            var mf = Run("moveFirst", "1 2 3");
+            var di = Run("distinct", "5 3 5 1 3");
+            var nu = Run("nonUnique", "5 3 8 3 1 5 9 3 7");
+            var kf = Run("keepFirst", "5 3 8 3 1 5 9 3 7");
+            var cc = Run("concat", "1 2", other: "3 4 5");
+            var sp = Run("split", "1 2 3 4 5", x: 3);
+            var sp2 = Run("split", "1 2 3", x: 9);
+            var db = Run("double", "1 2 3");
+            var sw = Run("swap", "1 2 3 4 5", i: 0, j: 4);
+            return J(rev.After) == "3 2 1" && J(ml.After) == "3 1 2" && J(mf.After) == "2 3 1"
+                && J(di.After) == "5 3 5 1 3" && J(di.BeforeHl) == "0 1 3" && di.Message.Contains("3")
+                && J(nu.After) == "8 1 9 7" && J(kf.After) == "5 3 8 1 9 7"
+                && J(cc.After) == "1 2 3 4 5" && J(cc.Input2) == "3 4 5" && J(cc.AfterHl) == "2 3 4"
+                && J(sp.After) == "1 2" && J(sp.Second) == "4 5" && J(sp.BeforeHl) == "2"
+                && J(sp2.After) == "1 2 3" && J(sp2.Second) == ""
+                && J(db.After) == "1 2 3 1 2 3" && J(db.AfterHl) == "3 4 5"
+                && J(sw.After) == "5 2 3 4 1"
+                && new[] { rev, ml, mf, di, nu, kf, cc, sp, sp2, db, sw }.All(x => x.Consistent)
+                && Throws<ArgumentException>(() => Run("swap", "1 2", i: 0, j: 2))
+                && Throws<InvalidOperationException>(() => Run("moveLast", ""));
+        });
         // ---- Часть 4: пункты 9–12 ----
         Check("Список: Concat (дописать E в конец L)", () =>
         {

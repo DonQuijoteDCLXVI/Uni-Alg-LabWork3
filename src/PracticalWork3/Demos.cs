@@ -245,6 +245,35 @@ public static class Demos
         Show("4. RemoveNonUnique (убрать все повторяющиеся)", ListAlgorithms.RemoveNonUnique);
         Show("4*. RemoveDuplicatesKeepFirst (вариант)", ListAlgorithms.RemoveDuplicatesKeepFirst);
 
+        // пп. 5–8
+        Console.WriteLine("\n── Пункты 5–8 ──");
+        {
+            int x = 3;
+            var l5 = original.Clone();
+            bool found5 = ListAlgorithms.InsertSelfAfterFirst(l5, x);
+            Console.WriteLine($"{$"5. InsertSelfAfterFirst (x = {x})",-44} {l5}   {Verify(l5)}  найден: {found5}");
+
+            var sorted = ListAlgorithms.ParseList("1 3 3 5 8 9");
+            Console.WriteLine("Упорядоченный список для п. 6: " + sorted);
+            foreach (int ins in new[] { 0, 4, 3, 10 })
+            {
+                var l6 = sorted.Clone();
+                ListAlgorithms.InsertSorted(l6, ins);
+                Console.WriteLine($"{$"6. InsertSorted (E = {ins})",-44} {l6}   {Verify(l6)}");
+            }
+
+            var l7 = original.Clone();
+            int removed = ListAlgorithms.RemoveAll(l7, x);
+            Console.WriteLine($"{$"7. RemoveAll (E = {x})",-44} {l7}   {Verify(l7)}  удалено: {removed}");
+
+            var l8 = original.Clone();
+            bool found8 = ListAlgorithms.InsertBeforeFirst(l8, x, 100);
+            Console.WriteLine($"{$"8. InsertBeforeFirst (E = {x}, F = 100)",-44} {l8}   {Verify(l8)}  найден: {found8}");
+            var l8b = original.Clone();
+            bool found8b = ListAlgorithms.InsertBeforeFirst(l8b, 42, 100);
+            Console.WriteLine($"{"8. InsertBeforeFirst (E = 42, F = 100)",-44} {l8b}   {Verify(l8b)}  найден: {found8b}");
+        }
+
         // пп. 9–12
         Console.WriteLine("\n── Пункты 9–12 ──");
 
